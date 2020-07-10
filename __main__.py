@@ -52,7 +52,6 @@ def validator():
         application = SRI.Marshal.GetActiveObject("SolidEdge.Application")
         print "Author: recs@premiertech.com"
         print "Last update: 2020-06-29"
-        print "version solidedge: %s" % application.Value
 
         assert application.Value in [
             "Solid Edge ST7",
@@ -74,6 +73,7 @@ def validator():
             "morm8",
             "benn2",
             "recs",
+            "slimane",
             "gils2",
             "albp",
             "tres2",
@@ -84,34 +84,33 @@ def validator():
             sys.exit()
 
         plate = application.ActiveDocument
-        print "part: %s\n" % plate.Name
+        print("part: %s\n" % plate.Name)
+        print "="*65
 
         # asm.Type =>  plate :4 , assembly : 3, partdocument: 1
         assert plate.Type == 4, "This macro only works on plate"
 
         # CARTOUCHE
 
-        print( "[CARTOUCHE] {0:<10}: {1:>20} {2:>10}".format('EQUIP_A' , plate.Properties.Item("Custom").Item('EQUIP_A').value, "OK"))
-        print( "[CARTOUCHE] {0:<10}: {1:>20} {2:>10}".format('SERIE_A' , plate.Properties.Item("Custom").Item('SERIE_A').value, "OK"))
-        print( "[CARTOUCHE] {0:<10}: {1:>20} {2:>10}".format('MODULE_A' , plate.Properties.Item("Custom").Item('MODULE_A').value, "OK"))
-        print( " %s: %s, " % ( 'Teamcenter'  , plate.Properties.Item("Custom").Item('Teamcenter Item Type').value))
-        print( " %s: %s, " % ( 'JDELITM' , plate.Properties.Item("Custom").Item('JDELITM').value))
-        print( " %s: %s, " % ( 'CATEGORY_VB' , plate.Properties.Item("Custom").Item('CATEGORY_VB').value))
-        print( " %s: %s, " % ( 'Material'  , plate.Properties.Item("Custom").Item('Material Thickness').value))
-        print( " %s: %s, " % ( 'Bend'  , plate.Properties.Item("Custom").Item('Bend Radius').value))
-        print( " %s: %s, " % ( 'Teamcenter'  , plate.Properties.Item("Custom").Item('Teamcenter Item Type').value))
-        print( " %s: %s, " % ( 'PartType' , plate.Properties.Item("Custom").Item('PartType').value))
-        print( " %s: %s, " % ( 'CATEGORY_VB' , plate.Properties.Item("Custom").Item('CATEGORY_VB').value))
-        print( " %s: %s, " % ( 'Nom'  , plate.Properties.Item("Custom").Item('Nom de la piece').value))
-        print( " %s: %s, " % ( 'DIM' , plate.Properties.Item("Custom").Item('DIM').value))
-        print( " %s: %s, " % ( 'Dim1' , plate.Properties.Item("Custom").Item('Dim1').value))
-        print( " %s: %s, " % ( 'Dim2' , plate.Properties.Item("Custom").Item('Dim2').value))
-        print( " %s: %s, " % ( 'CAD_UOM' , plate.Properties.Item("Custom").Item('CAD_UOM').value))
-        print( " %s: %s, " % ( 'DSC_A' , plate.Properties.Item("Custom").Item('DSC_A').value))
-        print( " %s: %s, " % ( 'DSC_M_A' , plate.Properties.Item("Custom").Item('DSC_M_A').value))
-        print( " %s: %s, " % ( 'JDEDSC1_A' , plate.Properties.Item("Custom").Item('JDEDSC1_A').value))
-        print( " %s: %s, " % ( 'JDEDSC2_A' , plate.Properties.Item("Custom").Item('JDEDSC2_A').value))
-        print( " %s: %s, " % ( 'JDESTRX_A' , plate.Properties.Item("Custom").Item('JDESTRX_A').value))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('EQUIP_A' , plate.Properties.Item("Custom").Item('EQUIP_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('SERIE_A' , plate.Properties.Item("Custom").Item('SERIE_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('MODULE_A' , plate.Properties.Item("Custom").Item('MODULE_A').value, "OK"))
+        print( "[JDE      ] {0:>20}: {1:>30} {2:>5}".format('JDELITM' , plate.Properties.Item("Custom").Item('JDELITM').value, "OK"))
+        print( "[MATERIAL ] {0:>20}: {1:>30} {2:>5}".format('Material'  , plate.Properties.Item("Custom").Item('Material Thickness').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Bend'  , plate.Properties.Item("Custom").Item('Bend Radius').value, "OK"))
+        print( "[CAD      ] {0:>20}: {1:>30} {2:>5}".format('Teamcenter'  , plate.Properties.Item("Custom").Item('Teamcenter Item Type').value, "OK"))
+        print( "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('PartType' , plate.Properties.Item("Custom").Item('PartType').value, "OK"))
+        print( "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('CATEGORY_VB' , plate.Properties.Item("Custom").Item('CATEGORY_VB').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Nom'  , plate.Properties.Item("Custom").Item('Nom de la piece').value, "OK"))
+        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('DIM' , plate.Properties.Item("Custom").Item('DIM').value, "OK"))
+        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim1' , plate.Properties.Item("Custom").Item('Dim1').value, "OK"))
+        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim2' , plate.Properties.Item("Custom").Item('Dim2').value, "OK"))
+        print( "[UNITS    ] {0:>20}: {1:>30} {2:>5}".format('CAD_UOM' , plate.Properties.Item("Custom").Item('CAD_UOM').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_A' , plate.Properties.Item("Custom").Item('DSC_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_M_A' , plate.Properties.Item("Custom").Item('DSC_M_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC1_A' , plate.Properties.Item("Custom").Item('JDEDSC1_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC2_A' , plate.Properties.Item("Custom").Item('JDEDSC2_A').value, "OK"))
+        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDESTRX_A' , plate.Properties.Item("Custom").Item('JDESTRX_A').value, "OK"))
 
         # Get a reference to the Variables collection.
         variables = plate.Variables
@@ -126,11 +125,12 @@ def validator():
         # // Process variables.
         # print(variableList['Flat_Pattern_Model_CutSizeY'].Value) # exist only with flate pattern
         # print(variableList['Flat_Pattern_Model_CutSizeX'].Value)
-        print(variableList['A'].Value)
-        print(variableList['N'].Value)
+        print( "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('A' , variableList['A'].Value, "OK"))
+        print( "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('N' , variableList['N'].Value, "OK"))
         # print("Dimension: {0} = {1} {2}".format(variable.Type , variable.DisplayName, variable.Value))
 
-        print(plate.ModelingMode) #1 sync #2 ordered
+        print( "[MODE] {0:>20}: {1:>30} {2:>5}".format('N' , plate.ModelingMode, "OK"))
+        #1 sync #2 ordered
 
         # flatten
         # if plate.FlatPatternModels.Count >= 1:
