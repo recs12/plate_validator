@@ -75,20 +75,29 @@ def validate_modeling_mode(part):
     else:
         return "WRONG MODE"
 
+# TODO: [1] develop function
 def convertor_meter_to_inch(dim):
     pass
 
+# TODO: [1] develop function
 def convertor_radius_to_degres(dim):
     pass
 
+# TODO: [1] develop function
 def get_number_of_bend(part):
-    pass
+    BendAngle
+    BendRadius
+    Type = -1752010637
 
+# TODO: [1] develop function
 def get_number_holes(part):
-    pass
+    part.DesignEdgebarFeatures
+    Type = 462094722
 
+# TODO: [1] develop function
 def get_number_of_cutouts(part):
-    pass
+    part.DesignEdgebarFeatures
+    Type = 462094714
 
 def main():
     try:
