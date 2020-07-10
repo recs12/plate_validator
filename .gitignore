@@ -1,0 +1,15 @@
+*.exe
+*.log
+*.pyc
+*.csv
+.cache/
+.coverage
+.idea/
+.vscode/
+spareparts.egg-info/
+build/
+dist/
+docs/build/
+venv/
+wheelhouse/
+samples/

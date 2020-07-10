@@ -11,7 +11,6 @@ clr.AddReference("Interop.SolidEdge")
 clr.AddReference("System")
 clr.AddReference("System.Runtime.InteropServices")
 
-import jt
 import SolidEdgeFramework
 import SolidEdgeConstants
 import System
@@ -46,12 +45,56 @@ def username():
 def combine(path1, path2):
     return Combine(path1, path2)
 
+def blank_field(content):
+    if not content:
+        return "MISSING"
+    return "OK"
 
-def validator():
+def flatpattern_exist(part):
+    if part.FlatPatternModels.item(1):
+        return "OK"
+    return "MISSING"
+
+def get_modeling_mode(part):
+    mode = part.ModelingMode
+    if  mode == 1:
+        return "SYNCHRONOUS"
+    elif mode == 2:
+        return "ORDERED"
+    elif mode == 3:
+        return "SIMPLIFY"
+    elif mode == 4:
+        return "FLATTEN"
+    else:
+        return "Unknown"
+
+def validate_modeling_mode(part):
+    mode = part.ModelingMode
+    if  mode == 2:
+        return "OK"
+    else:
+        return "WRONG MODE"
+
+def convertor_meter_to_inch(dim):
+    pass
+
+def convertor_radius_to_degres(dim):
+    pass
+
+def get_number_of_bend(part):
+    pass
+
+def get_number_holes(part):
+    pass
+
+def get_number_of_cutouts(part):
+    pass
+
+def main():
     try:
         application = SRI.Marshal.GetActiveObject("SolidEdge.Application")
         print "Author: recs@premiertech.com"
-        print "Last update: 2020-06-29"
+        print "Last update: 2020-07-10"
 
         assert application.Value in [
             "Solid Edge ST7",
@@ -59,7 +102,7 @@ def validator():
         ], "Unvalid version of solidedge"
 
         user = username()
-        print "\nUser: %s" % user
+        print "User: %s" % user
         if user.lower() in [
             "alba",
             "bouc11",
@@ -80,74 +123,67 @@ def validator():
         ]:
             print "Autorized user ID"
         else:
-            print("user with no valid permissions.")
+            print "user with no valid permissions."
             sys.exit()
 
         plate = application.ActiveDocument
-        print("part: %s\n" % plate.Name)
-        print "="*65
+        print "\npart: %s" % plate.Name
+        print "="*70
 
-        # asm.Type =>  plate :4 , assembly : 3, partdocument: 1
+        # Code for plate : 4
         assert plate.Type == 4, "This macro only works on plate"
 
-        # CARTOUCHE
+        equipe_a = plate.Properties.Item("Custom").Item('EQUIP_A').value
+        serie_a = plate.Properties.Item("Custom").Item('SERIE_A').value
 
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('EQUIP_A' , plate.Properties.Item("Custom").Item('EQUIP_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('SERIE_A' , plate.Properties.Item("Custom").Item('SERIE_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('MODULE_A' , plate.Properties.Item("Custom").Item('MODULE_A').value, "OK"))
-        print( "[JDE      ] {0:>20}: {1:>30} {2:>5}".format('JDELITM' , plate.Properties.Item("Custom").Item('JDELITM').value, "OK"))
-        print( "[MATERIAL ] {0:>20}: {1:>30} {2:>5}".format('Material'  , plate.Properties.Item("Custom").Item('Material Thickness').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Bend'  , plate.Properties.Item("Custom").Item('Bend Radius').value, "OK"))
-        print( "[CAD      ] {0:>20}: {1:>30} {2:>5}".format('Teamcenter'  , plate.Properties.Item("Custom").Item('Teamcenter Item Type').value, "OK"))
-        print( "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('PartType' , plate.Properties.Item("Custom").Item('PartType').value, "OK"))
-        print( "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('CATEGORY_VB' , plate.Properties.Item("Custom").Item('CATEGORY_VB').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Nom'  , plate.Properties.Item("Custom").Item('Nom de la piece').value, "OK"))
-        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('DIM' , plate.Properties.Item("Custom").Item('DIM').value, "OK"))
-        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim1' , plate.Properties.Item("Custom").Item('Dim1').value, "OK"))
-        print( "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim2' , plate.Properties.Item("Custom").Item('Dim2').value, "OK"))
-        print( "[UNITS    ] {0:>20}: {1:>30} {2:>5}".format('CAD_UOM' , plate.Properties.Item("Custom").Item('CAD_UOM').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_A' , plate.Properties.Item("Custom").Item('DSC_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_M_A' , plate.Properties.Item("Custom").Item('DSC_M_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC1_A' , plate.Properties.Item("Custom").Item('JDEDSC1_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC2_A' , plate.Properties.Item("Custom").Item('JDEDSC2_A').value, "OK"))
-        print( "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDESTRX_A' , plate.Properties.Item("Custom").Item('JDESTRX_A').value, "OK"))
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('EQUIP_A' , equipe_a, blank_field(equipe_a))
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('SERIE_A' , serie_a, blank_field(serie_a))
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('MODULE_A' , plate.Properties.Item("Custom").Item('MODULE_A').value, "OK")
+        print "[JDE      ] {0:>20}: {1:>30} {2:>5}".format('JDELITM' , plate.Properties.Item("Custom").Item('JDELITM').value, "OK")
+        print "[MATERIAL ] {0:>20}: {1:>30} {2:>5}".format('Material'  , plate.Properties.Item("Custom").Item('Material Thickness').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Bend'  , plate.Properties.Item("Custom").Item('Bend Radius').value, "OK")
+        print "[CAD      ] {0:>20}: {1:>30} {2:>5}".format('Teamcenter'  , plate.Properties.Item("Custom").Item('Teamcenter Item Type').value, "OK")
+        print "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('PartType' , plate.Properties.Item("Custom").Item('PartType').value, "OK")
+        print "[CATEGORY ] {0:>20}: {1:>30} {2:>5}".format('CATEGORY_VB' , plate.Properties.Item("Custom").Item('CATEGORY_VB').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('Nom'  , plate.Properties.Item("Custom").Item('Nom de la piece').value, "OK")
+        print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('DIM' , plate.Properties.Item("Custom").Item('DIM').value, "OK")
+        print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim1' , plate.Properties.Item("Custom").Item('Dim1').value, "OK")
+        print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format('Dim2' , plate.Properties.Item("Custom").Item('Dim2').value, "OK")
+        print "[UNITS    ] {0:>20}: {1:>30} {2:>5}".format('CAD_UOM' , plate.Properties.Item("Custom").Item('CAD_UOM').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_A' , plate.Properties.Item("Custom").Item('DSC_A').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('DSC_M_A' , plate.Properties.Item("Custom").Item('DSC_M_A').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC1_A' , plate.Properties.Item("Custom").Item('JDEDSC1_A').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDEDSC2_A' , plate.Properties.Item("Custom").Item('JDEDSC2_A').value, "OK")
+        print "[CARTOUCHE] {0:>20}: {1:>30} {2:>5}".format('JDESTRX_A' , plate.Properties.Item("Custom").Item('JDESTRX_A').value, "OK")
+        print "[MODE     ] {0:>20}: {1:>30} {2:>5}".format('MODELING MODE' , get_modeling_mode(plate), validate_modeling_mode(plate))
+        print "[MODELING] {0:>20}: {1:>30} {2:>5}".format('Flat-Pattern' , "", flatpattern_exist(plate))
 
-        # Get a reference to the Variables collection.
+        # VARIABLES:
         variables = plate.Variables
-
-        # // Get a reference to the variablelist.
         variableList = variables.Query(
             pFindCriterium = "*",
             NamedBy = SolidEdgeConstants.VariableNameBy.seVariableNameByBoth,
             VarType = SolidEdgeConstants.VariableVarType.SeVariableVarTypeBoth,
         )
+        if flatpattern_exist(plate) == "OK":
+            print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format("flatten-dimension", variableList['Flat_Pattern_Model_CutSizeY'].Value, "OK")  # exist only with flate pattern
+            print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format("flatten-dimension", variableList['Flat_Pattern_Model_CutSizeX'].Value, "OK")
+        print "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('A' , variableList['A'].Value, "OK")
+        print "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('N' , variableList['N'].Value, "OK")
 
-        # // Process variables.
-        # print(variableList['Flat_Pattern_Model_CutSizeY'].Value) # exist only with flate pattern
-        # print(variableList['Flat_Pattern_Model_CutSizeX'].Value)
-        print( "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('A' , variableList['A'].Value, "OK"))
-        print( "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('N' , variableList['N'].Value, "OK"))
-        # print("Dimension: {0} = {1} {2}".format(variable.Type , variable.DisplayName, variable.Value))
-
-        print( "[MODE] {0:>20}: {1:>30} {2:>5}".format('N' , plate.ModelingMode, "OK"))
-        #1 sync #2 ordered
-
-        # flatten
-        # if plate.FlatPatternModels.Count >= 1:
-        #     print "flatten ok"
-        # if plate.FlatPatternModels.Count == 0:
-        #     print "flatten failed"
 
         # check number of angles
-        # check if draft exist
         # check holes
         # check cutout
 
+        print "\n"
+        print "Features (list):"
         for f in plate.DesignEdgebarFeatures:
             print(f.Name)
 
-        for i in plate.Models:
-            print(i.Name)
+        # Implement first standards.py  then standards.yaml
+        # refactor helpers.py standards.py
+        # refactor permissions.py
 
     except AssertionError as err:
         print(err.args)
@@ -161,7 +197,7 @@ def validator():
 
 
 def confirmation(func):
-    response = raw_input("""Validate sheetmetal parameters ? (Press y/[Y] to proceed.)""")
+    response = raw_input("""Validate sheetmetal modeling? (Press y/[Y] to proceed.)""")
     if response.lower() not in ["y", "yes", "oui"]:
         print("Process canceled")
         sys.exit()
@@ -170,4 +206,4 @@ def confirmation(func):
 
 
 if __name__ == "__main__":
-    confirmation(validator)
+    confirmation(main)
