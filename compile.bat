@@ -6,4 +6,4 @@ Interop.SolidEdge.dll ^
 /platform:x64 ^
 /standalone ^
 /target:exe ^
-/win32icon:icon.ico 
+/win32icon:icon.ico
