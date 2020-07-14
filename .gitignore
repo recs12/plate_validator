@@ -13,3 +13,5 @@ docs/build/
 venv/
 wheelhouse/
 samples/
+.fake
+.ionide

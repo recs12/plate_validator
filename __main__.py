@@ -15,12 +15,13 @@ import SolidEdgeFramework
 import SolidEdgeConstants
 import System
 import System.Runtime.InteropServices as SRI
-from System import Console
+from System import Console, Math
 from System.IO import Directory
 from System.IO.Path import Combine
 import SolidEdgeConstants
-
 import permissions, helpers
+
+from  standards import MAX
 
 def blank_field(content):
     if not content:
@@ -52,30 +53,49 @@ def validate_modeling_mode(part):
     else:
         return "WRONG MODE"
 
-# TODO: [1] develop function
-def convertor_meter_to_inch(dim):
-    pass
+def convertor_meters_to_inches(m):
+    return (m * 39.3700787)
+
+def convertor_radius_to_degres(angle_in_radians):
+    return (angle_in_radians * (180/Math.PI))
 
 # TODO: [1] develop function
-def convertor_radius_to_degres(dim):
-    pass
-
-# TODO: [1] develop function
-def get_number_of_bend(part):
-    # BendAngle
+def get_number_Flange(part):
+    #  BendAngle
     # BendRadius
     # Flange Type = -1752010637
     return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == -1752010637])
 
 # TODO: [1] develop function
-def get_number_holes(part):
+def get_number_CoutourFlange(part):
+    #  BendAngle
+    # BendRadius
+    # Flange Type = 281089316
+    return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 281089316])
+
+# TODO: [1] develop function
+def get_number_Hole(part):
     # Hole Type = 462094722
     return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 462094722])
 
-# TODO: [1] develop function
-def get_number_of_cutouts(part):
+def get_number_ExtrudedCutout(part):
     # Cutout Type = 462094714
     return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 462094714])
+
+# TODO: [1] develop function
+def get_number_NormalCutout(part):
+    # Normal Cutout Type = -292547215
+    return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == -292547215])
+
+# TODO: [1] develop the concept
+def check_maximum(*dims):
+    """ Check maximum size possible in sheetmetal. 10"x5"
+    """
+    width, height  = sorted(list(dims))
+    if  width < MAX.get('width') and height < MAX.get('height'):
+        return "OK"
+    else:
+        return "max size exceeded"
 
 def main():
     try:
@@ -88,7 +108,7 @@ def main():
         permissions.permissions(application)
 
         print "\npart: %s" % plate.Name
-        print "="*70
+        print "="*75
 
         equip_a = plate.Properties.Item("Custom").Item('EQUIP_A').value
         serie_a = plate.Properties.Item("Custom").Item('SERIE_A').value
@@ -110,32 +130,6 @@ def main():
         jdedsc2_a = plate.Properties.Item("Custom").Item('JDEDSC2_A').value
         jdestrx_a = plate.Properties.Item("Custom").Item('JDESTRX_A').value
 
-        print "[NUMBER FLANGES] {0:>20}: {1:>30} {2:>5}".format('NUMBER FLANGES' , get_number_of_bend(plate), "x")
-        print "[NUMBER HOLES] {0:>20}: {1:>30} {2:>5}".format('NUMBER HOLES' , get_number_holes(plate) , "x")
-        print "[NUMBER CUTOUT] {0:>20}: {1:>30} {2:>5}".format('NUMBER CUTOUT' , get_number_of_cutouts(plate) , "x")
-
-        print "[BOM      ]: {0:<20}{1:.<40}{2:.>5}".format('DSC_A' , dsc_a, blank_field(dsc_a))
-        print "[MANUALS  ]: {0:<20}{1:.<40}{2:.>5}".format('DSC_M_A' , dsc_m_a, blank_field(dsc_m_a))
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('EQUIP_A' , equip_a, blank_field(equip_a))
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('SERIE_A' , serie_a, blank_field(serie_a))
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('MODULE_A' , module_a, blank_field(module_a))
-        print "[JDE      ]: {0:<20}{1:.<40}{2:.>5}".format('JDELITM' , jdelitm, blank_field(jdelitm))
-        print "[MATERIAL ]: {0:<20}{1:.<40}{2:.>5}".format('Material'  ,material , blank_field())
-        print "[CAD      ]: {0:<20}{1:.<40}{2:.>5}".format('Teamcenter'  , teamcenter, blank_field())
-        print "[UNITS    ]: {0:<20}{1:.<40}{2:.>5}".format('CAD_UOM' , cad_uom, blank_field())
-        print "[CATEGORY ]: {0:<20}{1:.<40}{2:.>5}".format('PartType' , parttype, blank_field())
-        print "[CATEGORY ]: {0:<20}{1:.<40}{2:.>5}".format('CATEGORY_VB' , category_vb, blank_field())
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('Nom'  , part_name, blank_field())
-        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>5}".format('DIM' , Dim, blank_field())
-        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>5}".format('Dim1' , dim1, blank_field())
-        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>5}".format('Dim2' , dim2, blank_field())
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('JDEDSC1_A' , jdedsc1_a, blank_field())
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('JDEDSC2_A' , jdedsc2_a, blank_field())
-        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>5}".format('JDESTRX_A' , jdestrx_a, blank_field())
-        print "[MODE     ]: {0:<20}{1:.<40}{2:.>5}".format('MODELING_MODE' , get_modeling_mode(plate), validate_modeling_mode(plate))
-        print "[MODELING] {0:>20}: {1:>30} {2:>5}".format('FLATE_PATTERN' , "", flatpattern_exist(plate))
-        print "[BEND     ]: {0:<20}{1:.<40}{2:.>5}".format('Bend'  , bend, blank_field())
-
         # VARIABLES:
         variables = plate.Variables
         variableList = variables.Query(
@@ -143,16 +137,52 @@ def main():
             NamedBy = SolidEdgeConstants.VariableNameBy.seVariableNameByBoth,
             VarType = SolidEdgeConstants.VariableVarType.SeVariableVarTypeBoth,
         )
+
+        # CHECK MAXIMUM DIMENSIONS
+
+        max_Y = convertor_meters_to_inches(variableList['Flat_Pattern_Model_CutSizeY'].Value)
+        max_X = convertor_meters_to_inches(variableList['Flat_Pattern_Model_CutSizeX'].Value)
+
+        # DISPLAY:
+
+        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>15}".format('DIM' , dim, blank_field(dim))
+        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>15}".format('Dim1' , dim1, blank_field(dim1))
+        print "[DIMENSION]: {0:<20}{1:.<40}{2:.>15}".format('Dim2' , dim2, blank_field(dim2))
         if flatpattern_exist(plate) == "OK":
-            print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format("flatten-dimension", variableList['Flat_Pattern_Model_CutSizeY'].Value, "OK")  # exist only with flate pattern
-            print "[DIMENSION] {0:>20}: {1:>30} {2:>5}".format("flatten-dimension", variableList['Flat_Pattern_Model_CutSizeX'].Value, "OK")
-        print "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('A' , variableList['A'].Value, "OK")
-        print "[VARIABLES] {0:>20}: {1:>30} {2:>5}".format('N' , variableList['N'].Value, "OK")
+            print "[DIMENSION]: {0:<20}{1}X{2}{3:.>15}".format("flatten-dimension", max_X, max_Y, check_maximum(max_X, max_Y))  # exist only with flate pattern
+
+        print "[VARIABLES]: {0:<20}{1:.<40}{2:.>15}".format('A' , convertor_meters_to_inches(variableList['A'].Value), "ok")
+        print "[VARIABLES]: {0:<20}{1:.<40}{2:.>15}".format('N' , convertor_meters_to_inches(variableList['N'].Value), "ok")
+
+        # MODELING:
+        print "[MODE     ]: {0:<20}{1:.<40}{2:.>15}".format('MODELING_MODE' , get_modeling_mode(plate), validate_modeling_mode(plate))
+
+        # FEATURES:
+        print "[FLANGE   ]: {0:<20}{1:.<40}{2:.>15}".format('FLANGES' , get_number_Flange(plate), "x")
+        print "[CTRFLANGE]: {0:<20}{1:.<40}{2:.>15}".format('CONTOUR FLANGES' , get_number_CoutourFlange(plate), "x")
+        print "[HOLE     ]: {0:<20}{1:.<40}{2:.>15}".format('HOLES' , get_number_Hole(plate) , "x")
+        print "[CUTOUT   ]: {0:<20}{1:.<40}{2:.>15}".format('CUTOUT' , get_number_ExtrudedCutout(plate) , "x")
+        print "[CUTNORMAL]: {0:<20}{1:.<40}{2:.>15}".format('NORMAL_CUTOUT' , get_number_NormalCutout(plate) , "x")
+
+        print "[BOM      ]: {0:<20}{1:.<40}{2:.>15}".format('DSC_A' , dsc_a, blank_field(dsc_a))
+        print "[MANUALS  ]: {0:<20}{1:.<40}{2:.>15}".format('DSC_M_A' , dsc_m_a, blank_field(dsc_m_a))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('EQUIP_A' , equip_a, blank_field(equip_a))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('SERIE_A' , serie_a, blank_field(serie_a))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('MODULE_A' , module_a, blank_field(module_a))
+        print "[JDE      ]: {0:<20}{1:.<40}{2:.>15}".format('JDELITM' , jdelitm, blank_field(jdelitm))
+        print "[MATERIAL ]: {0:<20}{1:.<40}{2:.>15}".format('Material'  , material, blank_field(material))
+        print "[CAD      ]: {0:<20}{1:.<40}{2:.>15}".format('Teamcenter', teamcenter, blank_field(teamcenter))
+        print "[UNITS    ]: {0:<20}{1:.<40}{2:.>15}".format('CAD_UOM' , cad_uom, blank_field(cad_uom))
+        print "[CATEGORY ]: {0:<20}{1:.<40}{2:.>15}".format('PartType' , parttype, blank_field(parttype))
+        print "[CATEGORY ]: {0:<20}{1:.<40}{2:.>15}".format('CATEGORY_VB' , category_vb, blank_field(category_vb))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('Nom'  , part_name, blank_field(part_name))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('JDEDSC1_A' , jdedsc1_a, blank_field(jdedsc1_a))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('JDEDSC2_A' , jdedsc2_a, blank_field(jdedsc2_a))
+        print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('JDESTRX_A' , jdestrx_a, blank_field(jdestrx_a))
+        print "[MODELING ]: {0:<20}{1:.<40}{2:.>15}".format('FLATE_PATTERN' , "", flatpattern_exist(plate))
+        print "[BEND     ]: {0:<20}{1:.<40}{2:.>15}".format('Bend'  , bend , "update")
 
 
-        # check number of angles
-        # check holes
-        # check cutout
 
         # CHECK THE HOLE OPTIONS
 
@@ -182,3 +212,6 @@ def confirmation(func):
 
 if __name__ == "__main__":
     confirmation(main)
+
+
+# TODO: [2] check features under constrainted.
