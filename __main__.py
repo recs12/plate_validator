@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-hide hardware and save the assembly as .jt or parasolid
+Check list for sheet plate.
 """
 
 import sys
@@ -21,7 +21,7 @@ from System.IO.Path import Combine
 import SolidEdgeConstants
 import permissions, helpers
 
-from  standards import MAX
+from  standards import MAX, PLIAGE
 
 def blank_field(content):
     if not content:
@@ -54,40 +54,57 @@ def validate_modeling_mode(part):
         return "WRONG MODE"
 
 def convertor_meters_to_inches(m):
-    return (m * 39.3700787)
+    return m * 39.3700787
 
 def convertor_radius_to_degres(angle_in_radians):
     return (angle_in_radians * (180/Math.PI))
 
 # TODO: [1] develop function
+def get_data_Flange(part):
+    # BendAngle, BendRadius, Flange Type = -1752010637
+    return [(
+        bend.Name ,
+        "%.3f in" %convertor_meters_to_inches(bend.BendRadius),
+        convertor_radius_to_degres(bend.BendAngle),
+        ) for bend in part.DesignEdgebarFeatures if bend.Type == -1752010637]
+
+# TODO: [1] develop function
 def get_number_Flange(part):
-    #  BendAngle
+    # BendAngle
     # BendRadius
     # Flange Type = -1752010637
     return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == -1752010637])
 
 # TODO: [1] develop function
 def get_number_CoutourFlange(part):
-    #  BendAngle
+    # BendAngle
     # BendRadius
     # Flange Type = 281089316
     return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 281089316])
 
 # TODO: [1] develop function
+def get_data_ContourFlanges(part):
+    # BendRadius, Flange Type = 281089316
+    return [(
+        contour.Name ,
+        "%.3f in" %convertor_meters_to_inches(contour.BendRadius),
+    ) for contour in part.DesignEdgebarFeatures if contour.Type == 281089316]
+
+
+# TODO: [1] develop function
 def get_number_Hole(part):
     # Hole Type = 462094722
-    return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 462094722])
+    return len([hole.Name for hole in part.DesignEdgebarFeatures if hole.Type == 462094722])
 
 def get_number_ExtrudedCutout(part):
     # Cutout Type = 462094714
-    return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == 462094714])
+    return len([cutout.Name for cutout in part.DesignEdgebarFeatures if cutout.Type == 462094714])
 
 # TODO: [1] develop function
 def get_number_NormalCutout(part):
     # Normal Cutout Type = -292547215
-    return len([bend.Name for bend in part.DesignEdgebarFeatures if bend.Type == -292547215])
+    return len([ncutout.Name for ncutout in part.DesignEdgebarFeatures if ncutout.Type == -292547215])
 
-# TODO: [1] develop the concept
 def check_maximum(*dims):
     """ Check maximum size possible in sheetmetal. 10"x5"
     """
@@ -96,6 +113,11 @@ def check_maximum(*dims):
         return "OK"
     else:
         return "max size exceeded"
+
+def pli_exists(part):
+    if get_number_Flange(part) or get_number_CoutourFlange(part):
+        return True
+    return False
 
 def main():
     try:
@@ -107,14 +129,17 @@ def main():
         permissions.details()
         permissions.permissions(application)
 
-        print "\npart: %s" % plate.Name
+        print "part: %s" % plate.Name
         print "="*75
 
+        print get_data_Flange(plate)
+        print get_data_ContourFlanges(plate)
         equip_a = plate.Properties.Item("Custom").Item('EQUIP_A').value
         serie_a = plate.Properties.Item("Custom").Item('SERIE_A').value
         module_a = plate.Properties.Item("Custom").Item('MODULE_A').value
         jdelitm = plate.Properties.Item("Custom").Item('JDELITM').value
         material  = plate.Properties.Item("Custom").Item('Material Thickness').value
+
         bend  = plate.Properties.Item("Custom").Item('Bend Radius').value
         teamcenter  = plate.Properties.Item("Custom").Item('Teamcenter Item Type').value
         parttype = plate.Properties.Item("Custom").Item('PartType').value
@@ -129,6 +154,7 @@ def main():
         jdedsc1_a = plate.Properties.Item("Custom").Item('JDEDSC1_A').value
         jdedsc2_a = plate.Properties.Item("Custom").Item('JDEDSC2_A').value
         jdestrx_a = plate.Properties.Item("Custom").Item('JDESTRX_A').value
+
 
         # VARIABLES:
         variables = plate.Variables
@@ -171,6 +197,8 @@ def main():
         print "[CARTOUCHE]: {0:<20}{1:.<40}{2:.>15}".format('MODULE_A' , module_a, blank_field(module_a))
         print "[JDE      ]: {0:<20}{1:.<40}{2:.>15}".format('JDELITM' , jdelitm, blank_field(jdelitm))
         print "[MATERIAL ]: {0:<20}{1:.<40}{2:.>15}".format('Material'  , material, blank_field(material))
+        if pli_exists(plate):
+            print(PLIAGE.get(material).get('B')) # pli minimum
         print "[CAD      ]: {0:<20}{1:.<40}{2:.>15}".format('Teamcenter', teamcenter, blank_field(teamcenter))
         print "[UNITS    ]: {0:<20}{1:.<40}{2:.>15}".format('CAD_UOM' , cad_uom, blank_field(cad_uom))
         print "[CATEGORY ]: {0:<20}{1:.<40}{2:.>15}".format('PartType' , parttype, blank_field(parttype))
@@ -182,13 +210,6 @@ def main():
         print "[MODELING ]: {0:<20}{1:.<40}{2:.>15}".format('FLATE_PATTERN' , "", flatpattern_exist(plate))
         print "[BEND     ]: {0:<20}{1:.<40}{2:.>15}".format('Bend'  , bend , "update")
 
-
-
-        # CHECK THE HOLE OPTIONS
-
-        # Implement first standards.py  then standards.yaml
-        # refactor helpers.py standards.py
-        # refactor permissions.py
 
     except AssertionError as err:
         print(err.args)
