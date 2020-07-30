@@ -11,18 +11,16 @@ clr.AddReference("Interop.SolidEdge")
 clr.AddReference("System")
 clr.AddReference("System.Runtime.InteropServices")
 
-import SolidEdgeFramework
-import SolidEdgeConstants
 import System
 import System.Runtime.InteropServices as SRI
-from System import Console, Math
-from System.IO import Directory
-from System.IO.Path import Combine
-import SolidEdgeConstants
+from System import Console
 import permissions, helpers
 
-from  standards import MAX, PLIAGE
+from standards import PLIAGE, thickness_mapping
 from helpers import *
+from debbug import loggingINFO
+
+__VERSION__ = "0.0.4"
 
 
 def main():
@@ -34,80 +32,192 @@ def main():
         permissions.details()
         permissions.permissions(application)
 
-        print "part: %s" % plate.Name
-        print "="*75
+        print("part: %s" % plate.Name)
+        print("=" * 88)
 
-        # TODO: [1] try to work out a way to align display and debugging together so I can debug more easly.
-        # example by creating func for each value, functional style maybe.
+        # build a logger
+        loggingINFO("====================DEBUG MODE======================")
+        DIM = properties(plate, "DIM")
+        loggingINFO("DIM :")
+        loggingINFO(str(DIM))
+        loggingINFO("")
 
-        equip_a     = properties( plate, 'EQUIP_A')
-        serie_a     = properties( plate, 'SERIE_A')
-        module_a    = properties( plate, 'MODULE_A')
-        jdelitm     = properties( plate, 'JDELITM')
-        material    = properties( plate, 'Material Thickness')
-        bend        = properties( plate, 'Bend Radius')
-        teamcenter  = properties( plate, 'Teamcenter Item Type')
-        category_vb = properties( plate, 'CATEGORY_VB')
-        part_name   = properties( plate, 'Nom de la piece')
-        dim         = properties( plate, 'DIM')
-        dim1        = properties( plate, 'Dim1')
-        dim2        = properties( plate, 'Dim2')
-        cad_uom     = properties( plate, 'CAD_UOM')
-        dsc_a       = properties( plate, 'DSC_A')
-        dsc_m_a     = properties( plate, 'DSC_M_A')
-        jdedsc1_a   = properties( plate, 'JDEDSC1_A')
-        jdedsc2_a   = properties( plate, 'JDEDSC2_A')
-        jdestrx_a   = properties( plate, 'JDESTRX_A')
+        dim1 = properties(plate, "dim1")
+        loggingINFO("dim1 :")
+        loggingINFO(str(dim1))
+        loggingINFO("")
 
-        # VARIABLES:
-        A           = variables(plate, 'A')
-        N           = variables(plate, 'N')
-        max_Y       = variables(plate, 'Flat_Pattern_Model_CutSizeY') # max size flatten
-        max_X       = variables(plate, 'Flat_Pattern_Model_CutSizeX') # max size flatten
+        dim2 = properties(plate, "dim2")
+        loggingINFO("dim2 :")
+        loggingINFO(str(dim2))
+        loggingINFO("")
 
-        # PLI
-        pli_min     = PLIAGE.get(jdedsc2_a).get("B")
-        angle_max   = PLIAGE.get(jdedsc2_a).get("A")
+        JDEDSC1_A = properties(plate, "JDEDSC1_A")
+        loggingINFO("JDEDSC1_A :")
+        loggingINFO(str(JDEDSC1_A))
+        loggingINFO("")
 
-        # DISPLAY:
-        ln("DESCRIPTION", 'DIM', dim, null(dim))
-        ln("DESCRIPTION", 'Dim1', dim1, null(dim1))
-        ln("DESCRIPTION", 'Dim2', dim2, null(dim2))
+        DSC_A = properties(plate, "DSC_A")
+        loggingINFO("DSC_A :")
+        loggingINFO(str(DSC_A))
+        loggingINFO("")
 
-        if flatpattern_exist(plate) == "OK":
-            dims = "{0:.3f}X{1:.3f}".format(max_X, max_Y)
-            ln("DIMENSION", "flatten-dimension", dims , check_maximum(max_X, max_Y))
-        ln("VARIABLES", "A", A, null(A))
-        ln("VARIABLES", "N", N, null(N))
+        EQUIP_A = properties(plate, "EQUIP_A")
+        loggingINFO("EQUIP_A :")
+        loggingINFO(str(EQUIP_A))
+        loggingINFO("")
 
-        # MODELING
-        ln("MODE",      "MODELING_MODE", get_modeling_mode(plate), validate_modeling_mode(plate))
-        ln("BOM",       "DSC_A",    dsc_a, null(dsc_a))
-        ln("MANUALS" ,  "DSC_M_A", dsc_m_a, null(dsc_m_a))
-        ln("CARTOUCHE", "EQUIP_A", equip_a, null(equip_a))
-        ln("CARTOUCHE", "SERIE_A", serie_a, null(serie_a))
-        ln("CARTOUCHE", "MODULE_A", module_a, null(module_a))
-        ln("JDE",       "JDELITM", jdelitm, null(jdelitm))
-        ln("MATERIAL",  "Material", material, null(material))
-        ln("CAD",       'Teamcenter', teamcenter, null(teamcenter))
-        ln("UNITS",     'CAD_UOM' , cad_uom, null(cad_uom))
-        ln("CATEGORY",  'CATEGORY_VB' , category_vb, null(category_vb))
-        ln("CARTOUCHE", 'NAME'  , part_name, null(part_name))
-        ln("DESCRIPTION",'JDEDSC1_A' , jdedsc1_a, null(jdedsc1_a))
-        ln("THICKNESS", 'JDEDSC2_A' , jdedsc2_a, null(jdedsc2_a))
-        ln("CARTOUCHE", 'JDESTRX_A' , jdestrx_a, null(jdestrx_a))
-        ln("MODELING",  'FLATE_PATTERN' , "", flatpattern_exist(plate))
-        # ln("BEND",      'Bend', bend , "x") # TODO
+        SERIE_A = properties(plate, "SERIE_A")
+        loggingINFO("SERIE_A :")
+        loggingINFO(str(SERIE_A))
+        loggingINFO("")
 
+        MODULE_A = properties(plate, "MODULE_A")
+        loggingINFO("MODULE_A :")
+        loggingINFO(str(MODULE_A))
+        loggingINFO("")
 
-        # FEATURES:
-        if get_number_Flange(plate): ln("FLANGE", 'B pli-min' , get_number_Flange(plate), pli_min) # TODO
-        if get_number_CoutourFlange(plate): ln("CTRFLANGE", 'B pli-min' , "", pli_min) # TODO
-        if get_number_Hole(plate) and pli_exists(plate): ln("HOLE", 'C pli-Trous' , "" , pli_min) # TODO
-        if get_number_Flange(plate)>1 or get_number_CoutourFlange(plate): ln("HORS-TOUT", 'H hors-tout' , "", pli_min) # TODO
-        if get_number_Flange(plate)==4: ln("FLANGES", 'B max (4 plis)', "", pli_min) # TODO
-        if get_number_Flange(plate) or get_number_CoutourFlange(plate): ln("ANGLE", "Angle max" , "(degres)", angle_max) # TODO
+        NAME = properties(plate, "Nom de la piece")
+        loggingINFO("Nom de la piece :")
+        loggingINFO(str(NAME))
+        loggingINFO("")
 
+        A = variables(plate, "A")
+        loggingINFO("A :")
+        loggingINFO(str(A))
+        loggingINFO("")
+
+        N = variables(plate, "N")
+        loggingINFO("N :")
+        loggingINFO(str(N))
+        loggingINFO("")
+
+        DSC_M_A = properties(plate, "DSC_M_A")
+        loggingINFO("DSC_M_A :")
+        loggingINFO(str(DSC_M_A))
+        loggingINFO("")
+
+        JDELITM = properties(plate, "JDELITM")
+        loggingINFO("JDELITM :")
+        loggingINFO(str(JDELITM))
+        loggingINFO("")
+
+        CAD = properties(plate, "Teamcenter Item Type")
+        loggingINFO("CAD :")
+        loggingINFO(str(CAD))
+        loggingINFO("")
+
+        CATEGORY_VB = properties(plate, "CATEGORY_VB")
+        loggingINFO("CATEGORY_VB :")
+        loggingINFO(str(CATEGORY_VB))
+        loggingINFO("")
+
+        CAD_UOM = properties(plate, "CAD_UOM")
+        loggingINFO("CAD_UOM :")
+        loggingINFO(str(CAD_UOM))
+        loggingINFO("")
+
+        THICKNESS = properties(plate, "JDEDSC2_A")
+        loggingINFO("THICKNESS :")
+        loggingINFO(str(THICKNESS))
+        loggingINFO("")
+
+        mode = get_modeling_mode(plate)
+        loggingINFO("mode :")
+        loggingINFO(str(mode))
+        loggingINFO("")
+
+        valide_mode = validate_modeling_mode(plate)
+        loggingINFO("valide_mode :")
+        loggingINFO(str(valide_mode))
+        loggingINFO("")
+
+        isflatten = flatpattern_exist(plate)
+        loggingINFO("isflatten :")
+        loggingINFO(str(isflatten))
+        loggingINFO("")
+
+        loggingINFO("====================END DEBUG MODE======================")
+
+        # add a condition according to mode select to display or not.
+
+        parameters = [
+            ("DESCRIPTION", "DIM", DIM, null(DIM)),
+            ("DESCRIPTION", "Dim1", dim1, null(dim1)),
+            ("DESCRIPTION", "Dim2", dim2, null(dim2)),
+            ("DESCRIPTION", "JDEDSC1_A", JDEDSC1_A, null(JDEDSC1_A)),
+            ("DESCRIPTION", "DSC_A", DSC_A, null(DSC_A)),
+            ("CARTOUCHE", "EQUIP_A", EQUIP_A, null(EQUIP_A)),
+            ("CARTOUCHE", "SERIE_A", SERIE_A, null(SERIE_A)),
+            ("CARTOUCHE", "MODULE_A", MODULE_A, null(MODULE_A)),
+            # (
+            #     "CARTOUCHE",
+            #     "NAME",
+            #     NAME,
+            #     null(NAME),
+            # ),
+            ("VARIABLES", "A", A, null(A)),
+            ("VARIABLES", "N", N, null(N)),
+            ("MODE", "MODELING_MODE", mode, valide_mode),
+            ("MODELING", "FLAT_PATTERN", "DESIGNED", isflatten),
+            ("MANUALS", "DSC_M_A", DSC_M_A, null(DSC_M_A)),
+            ("JDE", "JDELITM", JDELITM, null(JDELITM)),
+            # (
+            #     "MATERIAL",
+            #     "Material",
+            #     MATERIAL,
+            #     null(MATERIAL),
+            # ),
+            ("CAD", "Teamcenter", CAD, null(CAD)),
+            ("CATEGORY", "CATEGORY_VB", CATEGORY_VB, null(CATEGORY_VB)),
+            ("UNITS", "CAD_UOM", CAD_UOM, null(CAD_UOM)),
+            ("THICKNESS", "JDEDSC2_A", THICKNESS, null(THICKNESS)),
+        ]
+
+        # -- VIEW -- :
+        # ===========
+
+        map(ln, parameters)
+
+        # STANDARDS
+        thickness_jde = properties(plate, "JDEDSC2_A")
+        epaisseur = thickness_mapping.get(thickness_jde)
+        if epaisseur in PLIAGE.keys():
+            pli_min = PLIAGE.get(epaisseur).get("B", None)
+            b_max = PLIAGE.get(epaisseur).get("Bmax").get("STEEL PLATE", None)
+            hors_tout = PLIAGE.get(epaisseur).get("H").get("STEEL PLATE", None)
+            angle_max = PLIAGE.get(epaisseur).get("A", None)
+
+            # FEATURES:
+            if flatpattern_exist(plate) == "OK":
+                max_X = variables(plate, "Flat_Pattern_Model_CutSizeX")
+                max_Y = variables(plate, "Flat_Pattern_Model_CutSizeY")
+                d = dimensions(max_X, max_Y)
+                c = check_maximum(dim1=max_X, dim2=max_Y)
+                ln(("DIMENSION", "flatten-dimensions", d, c))
+
+                # implementation
+                # print(sorted([round(max_X, 2), round(max_Y, 2)]))
+                # print(sorted([round(dim1, 2), round(dim2, 2)]))
+                if sorted([round(max_X, 2), round(max_Y, 2)]) != sorted(
+                    [round(dim1, 2), round(dim2, 2)]
+                ):
+                    ln(("DIMENSION", "dimensions", dim1, "DISCREPENCY"))
+                    ln(("DIMENSION", "dimensions", dim2, "DISCREPENCY"))
+
+            if isCopiedPart(plate):
+                ln(("DESIGN", "Part Copy", "", "COPY"))
+            if get_number_Flange(plate) or get_number_CoutourFlange(plate):
+                ln(("DESIGN", "B pli-min", "in", pli_min))
+            if get_number_Flange(plate) == 4:
+                ln(("DESIGN", "B max (4 x plis)", "in", b_max))
+            if get_number_Flange(plate) > 1 or get_number_CoutourFlange(plate):
+                ln(("DESIGN", "H hors-tout", "in (pliage inverse)", hors_tout))
+            if get_number_Flange(plate) or get_number_CoutourFlange(plate):
+                ln(("DESIGN", "Angle Max", "degrees (pli interieur B)", angle_max))
+
+        else:
+            ln(("STANDARDS", "standards unavailable", "", thickness))
 
     except AssertionError as err:
         print(err.args)
@@ -131,3 +241,5 @@ def confirmation(func):
 
 if __name__ == "__main__":
     confirmation(main)
+
+# TODO: create a batch version

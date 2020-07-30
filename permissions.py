@@ -1,4 +1,3 @@
-
 import clr
 import sys
 
@@ -8,12 +7,15 @@ clr.AddReference("System.Runtime.InteropServices")
 
 import System
 
+
 def username():
     return System.Environment.UserName
 
+
 def details():
-    print "Author: recs@premiertech.com"
-    print "Last update: 2020-07-10"
+    print("Author: recs@premiertech.com")
+    print("Last update: 2020-07-10")
+
 
 def permissions(app):
 
@@ -23,7 +25,7 @@ def permissions(app):
     ], "Unvalid version of solidedge"
 
     user = username()
-    print "User: %s" % user
+    print("User: %s" % user)
     if user.lower() in [
         "alba",
         "bouc11",
@@ -42,7 +44,7 @@ def permissions(app):
         "albp",
         "tres2",
     ]:
-        print "Autorized user ID"
+        print("Autorized user ID")
     else:
-        print "user with no valid permissions."
+        print("user with no valid permissions.")
         sys.exit()
